@@ -1,6 +1,15 @@
 document.addEventListener("DOMContentLoaded", function () {
   const fontInput = document.getElementById("fontInput");
   const applyButton = document.getElementById("applyFont");
+  const statusElement = document.getElementById("status");
+
+  function showStatus(message, isError = false) {
+    statusElement.textContent = message;
+    statusElement.style.color = isError ? "#dc3545" : "#28a745";
+    setTimeout(() => {
+      statusElement.textContent = "";
+    }, 3000);
+  }
 
   chrome.storage.sync.get(["savedFont"], function (result) {
     if (result.savedFont) {
@@ -14,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (fontName) {
       applyButton.disabled = true;
       applyButton.textContent = "Aplicando...";
+      showStatus("Aplicando a fonte...");
 
       chrome.storage.sync.set({ savedFont: fontName }, function () {
         chrome.tabs.query(
@@ -28,11 +38,9 @@ document.addEventListener("DOMContentLoaded", function () {
                   applyButton.textContent = "Aplicar Fonte";
 
                   if (chrome.runtime.lastError) {
-                    alert(
-                      "Erro ao aplicar a fonte. Tente recarregar a página."
-                    );
+                    showStatus("Erro ao aplicar a fonte. Tente recarregar a página.", true);
                   } else {
-                    alert("Fonte aplicada com sucesso!");
+                    showStatus("Fonte aplicada com sucesso!");
                   }
                 }
               );
@@ -41,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
         );
       });
     } else {
-      alert("Por favor, insira um nome de fonte");
+      showStatus("Por favor, insira um nome de fonte", true);
     }
   });
 });
